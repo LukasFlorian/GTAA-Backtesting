@@ -5,7 +5,12 @@ from dateutil import relativedelta
 import pandas as pd
 
 
-def openConnection():
+def openConnection() -> tuple:
+    """used to open database connection, informs about status of connection (successful or not)
+
+    Returns:
+        cur, conn: cursor for and connection to database
+    """
     database = "/workspaces/Laufzeitoptimierung/📈GTAA-Backtesting/data/gtaa_database.db"
     try:
         conn = sql.connect(database)
@@ -16,15 +21,17 @@ def openConnection():
     cur = conn.cursor()
     return cur, conn
 
-def initialize():
-    """_summary_
+def initialize() -> None:
+    """initial creation of database with stocks table for stock ticker and name and historic table with historic prices for stocks on any given date
     """
     cur, conn = openConnection()
     cur.execute("CREATE TABLE Stocks (ticker TEXT PRIMARY KEY, name TEXT NOT NULL)")
     cur.execute("CREATE TABLE Historic (ticker TEXT NOT NULL, date TEXT NOT NULL, quote INT NOT NULL, ttm_sma INT NOT NULL, two_day_sma INT NOT NULL, ten_month_sma INT NOT NULL, six_month_sma INT NOT NULL, five_month_sma INT NOT NULL, three_month_sma INT NOT NULL, two_month_sma INT NOT NULL, PRIMARY KEY (ticker, date), FOREIGN KEY (ticker) REFERENCES Stocks(ticker))")
     conn.close()
 
-def dropAll():
+def dropAll() -> None:
+    """used to delete all database tables in case it needs to be re-initialized
+    """
     cur, conn = openConnection()
     cur.execute("DROP TABLE Stocks")
     cur.execute("DROP TABLE Historic")
@@ -33,8 +40,8 @@ def dropAll():
 #dropAll()
 #initialize()
 
-def getAverages(ttm, last_200, last_10m, last_6m, last_5m, last_3m, last_2m, quote, quote_date):
-    """get the averages for a stock
+def getAverages(ttm: list, last_200: list, last_10m: list, last_6m: list, last_5m: list, last_3m: list, last_2m: list, quote: float, quote_date: dt.datetime):
+    """calculates the averages for a stock
 
     Args:
         ttm (_type_): trailing twelve months
@@ -47,8 +54,14 @@ def getAverages(ttm, last_200, last_10m, last_6m, last_5m, last_3m, last_2m, quo
         quote (_type_): quote on quote_date
         quote_date (_type_): date of quote
     """
+    
     cur, conn = openConnection()
-    def getTtm(avList):
+    def getTtm(avList: list) -> list:
+        """average over trailing twelve months
+
+        Args:
+            avList (list): list of lists with format [date, quote on date, ttm average on date] 
+        """
         last_date = quote_date - relativedelta.relativedelta(years = 1)
         avList.append([quote_date, quote])
         first_valid = 0
@@ -62,7 +75,12 @@ def getAverages(ttm, last_200, last_10m, last_6m, last_5m, last_3m, last_2m, quo
         avList[-1] = [avList[-1][0], avList[-1][1], average]
         return(avList)
     
-    def get200d(avList):
+    def get200d(avList: list) -> list:
+        """average over last 200 trading days
+
+        Args:
+            avList (list): list of lists with format [date, quote on date, 200d average on date] of 200d averages in database 
+        """
         avList.append([quote_date, quote])
         lendif = len(avList) - 201 #current day irrelevant
         avList = avList[lendif:]
@@ -73,7 +91,8 @@ def getAverages(ttm, last_200, last_10m, last_6m, last_5m, last_3m, last_2m, quo
         avList[-1] = [avList[-1][0], avList[-1][1], average]
         return(avList)
     
-    def get_x_m(avList, num_months):
+    def get_x_m(avList: list, num_months: int) -> list:
+        #print(avList, num_months)
         last_date = quote_date - relativedelta.relativedelta(months = num_months)
         avList.append([quote_date, quote])
         first_valid = 0
@@ -100,11 +119,11 @@ def getAverages(ttm, last_200, last_10m, last_6m, last_5m, last_3m, last_2m, quo
     return(ttm, last_200, last_10m, last_6m, last_5m, last_3m, last_2m)
 
 
-def addStockData(ticker):
-    """ only use for new stocks not yet in the database
+def addStockData(ticker: str) -> None:
+    """ importing new stocks not yet in the database
     
     Args:
-        ticker (_type_): ticker whose stock info should be added
+        ticker (str): ticker whose stock info should be added
     """
     cur, conn = openConnection()
     stock_info = yf.Ticker(ticker)
@@ -132,7 +151,7 @@ def addStockData(ticker):
     conn.commit()
     conn.close()
 
-def updateStockData(ticker):
+def updateStockData(ticker: str) -> None:
     cur, conn = openConnection()
     """
     used to update data for listed stock with ticker
@@ -161,13 +180,14 @@ def updateStockData(ticker):
 
     cur.execute("SELECT date, quote FROM Historic WHERE Historic.ticker = \'" + ticker + "\' ORDER BY date desc")
     data = cur.fetchall()
-    print(data[0])
+    #print(data[0])
     latest = data[0][0]
     if (dt.datetime.now()-dt.datetime.strptime(latest, '%Y-%m-%d'))/dt.timedelta(days = 1) > 0:
         pass
-    print(type(latest))
+    #print(type(latest))
     conn.close()
     
-    
+#dropAll()
+#initialize()
 #addStockData("META")
 updateStockData("META")
