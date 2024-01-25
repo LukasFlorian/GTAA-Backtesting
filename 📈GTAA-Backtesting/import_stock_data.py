@@ -16,7 +16,8 @@ def openConnection() -> tuple:
         conn = sql.connect(database)
         print("Database Sqlite3.db formed.") 
     except:
-        print("Database Sqlite3.db not formed.")
+        raise Exception("Database Sqlite3.db not formed.")
+        #print("Database Sqlite3.db not formed.")
         
     cur = conn.cursor()
     return cur, conn
@@ -81,9 +82,13 @@ def getAverages(ttm: list, last_200: list, last_10m: list, last_6m: list, last_5
         Args:
             avList (list): list of lists with format [date, quote on date, 200d average on date] of 200d averages in database 
         """
+        #print(avList)
         avList.append([quote_date, quote])
-        lendif = len(avList) - 201 #current day irrelevant
+        if len(avList) == 1:
+            avList[0] = avList[0] + 
+        lendif = max(len(avList) - 201, 1) #current day irrelevant
         avList = avList[lendif:]
+        print(lendif, len(avList))
         sum = 0
         for entry in avList:
             sum += entry[1]
@@ -164,6 +169,7 @@ def updateStockData(ticker: str) -> None:
             last (_type_): last (most recent) date in avList
             price (_type_): price on a given day
         """
+        print(avList)
         latest = []
         earliest = dt.datetime.now() - relativedelta.relativedelta(months = months)
         avList = avList[::-1]
@@ -176,6 +182,7 @@ def updateStockData(ticker: str) -> None:
         indices = [12, 200, 10, 6, 5, 3, 2]
         index = indices.index(num_months) + 3
         avList = avList[first_valid]
+
         #new
 
     cur.execute("SELECT date, quote FROM Historic WHERE Historic.ticker = \'" + ticker + "\' ORDER BY date desc")
@@ -187,7 +194,7 @@ def updateStockData(ticker: str) -> None:
     #print(type(latest))
     conn.close()
     
-#dropAll()
-#initialize()
-#addStockData("META")
+dropAll()
+initialize()
+addStockData("META")
 updateStockData("META")
