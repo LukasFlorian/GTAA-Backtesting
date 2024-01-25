@@ -4,7 +4,6 @@ st.title("GTAA Backtesting Tool")
 st.subheader("By Lukas Richter & Nemanja Cerovac")
 
 
-
 st.write("---")
 
 
