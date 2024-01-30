@@ -74,7 +74,8 @@ def getAverages(ttm: list, last_200: list, last_10m: list, last_6m: list, last_5
             sum += entry[1]
         average = sum/len(avList)
         avList[-1] = [avList[-1][0], avList[-1][1], average]
-        return(avList)
+        return avList
+    
     
     def get200d(avList: list) -> list:
         """average over last 200 trading days
@@ -85,16 +86,17 @@ def getAverages(ttm: list, last_200: list, last_10m: list, last_6m: list, last_5
         #print(avList)
         avList.append([quote_date, quote])
         if len(avList) == 1:
-            avList[0] = avList[0] + 
-        lendif = max(len(avList) - 201, 1) #current day irrelevant
-        avList = avList[lendif:]
-        print(lendif, len(avList))
-        sum = 0
-        for entry in avList:
-            sum += entry[1]
-        average = sum/len(avList)
-        avList[-1] = [avList[-1][0], avList[-1][1], average]
-        return(avList)
+            avList[0] = avList[0] + [None]
+        else:
+            lendif = max(len(avList) - 201, 1) #current day irrelevant
+            avList = avList[lendif:]
+            print(lendif, len(avList))
+            sum = 0
+            for entry in avList:
+                sum += entry[1]
+            average = sum/len(avList)
+            avList[-1] = [avList[-1][0], avList[-1][1], average]
+        return avList
     
     def get_x_m(avList: list, num_months: int) -> list:
         #print(avList, num_months)
@@ -109,7 +111,7 @@ def getAverages(ttm: list, last_200: list, last_10m: list, last_6m: list, last_5
             sum += entry[1]
         average = sum/len(avList)
         avList[-1] = [avList[-1][0], avList[-1][1], average]
-        return(avList)
+        return avList
     
     ttm = getTtm(ttm)
     last_200 = get200d(last_200)
@@ -121,7 +123,7 @@ def getAverages(ttm: list, last_200: list, last_10m: list, last_6m: list, last_5
     
     
     conn.close()
-    return(ttm, last_200, last_10m, last_6m, last_5m, last_3m, last_2m)
+    return ttm, last_200, last_10m, last_6m, last_5m, last_3m, last_2m
 
 
 def addStockData(ticker: str) -> None:
