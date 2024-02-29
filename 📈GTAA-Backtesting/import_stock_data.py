@@ -1,5 +1,4 @@
 import yfinance as yf
-import sqlite3 as sql
 import datetime as dt
 from dateutil import relativedelta
 import pandas as pd
