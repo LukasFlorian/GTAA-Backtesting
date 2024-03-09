@@ -1,4 +1,4 @@
-%matplotlib inline
+#%matplotlib inline
 import quantstats as qs
 
 # extend pandas functionality with metrics, etc.
@@ -12,4 +12,4 @@ print(qs.stats.sharpe(stock))
 
 # or using extend_pandas() :)
 print(stock.sharpe())
-#qs.reports.html(stock, "SPY")
+qs.reports.html(stock, "SPY", output = True)
