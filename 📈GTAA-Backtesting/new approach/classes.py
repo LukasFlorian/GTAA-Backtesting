@@ -1,5 +1,0 @@
-class Entry:
-    
-
-class Portfolio:
-    
