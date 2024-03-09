@@ -19,7 +19,7 @@ class DB_Connection:
     def initialize_database(self) -> None:
         """initial creation of database with stocks table for stock ticker and name and historic table with historic prices for stocks on any given date
         """
-        self.__cur.execute("CREATE TABLE Stocks (ticker TEXT PRIMARY KEY, name TEXT NOT NULL)")
+        self.__cur.execute("CREATE TABLE Stocks (ticker TEXT PRIMARY KEY, name TEXT NOT NULL, first_quote TEXT, last_quote TEXT, number_quotes INT)")
         self.__cur.execute("CREATE TABLE Historic (ticker TEXT NOT NULL, date TEXT NOT NULL, quote INT NOT NULL, ttm_sma INT NOT NULL, two_day_sma INT NOT NULL, ten_month_sma INT NOT NULL, six_month_sma INT NOT NULL, five_month_sma INT NOT NULL, three_month_sma INT NOT NULL, two_month_sma INT NOT NULL, PRIMARY KEY (ticker, date), FOREIGN KEY (ticker) REFERENCES Stocks(ticker))")
     
     def dropAll(self) -> None:
