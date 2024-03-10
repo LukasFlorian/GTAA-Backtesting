@@ -36,9 +36,11 @@ print(stock.info)
 history = stock.history(period = "max")
 oldest_date = history.index[0]
 newest_date = history.index[-1]
-print(history["Close"])
+print(type(newest_date.to_pydatetime()))
+"""print(history["Close"])
 
 print(yf.download("AAPL", start=dt.datetime(year = 2021, month = 1, day = 1), end=dt.datetime(year = 2022, month = 1, day = 1)))
 test = dt.datetime(year = 2022, month = 1, day = 1)
 print(dt.datetime(year = 2022, month = 1, day = 1))
-print(test - rd.relativedelta(years = 1))
+print(test - rd.relativedelta(years = 1))"""
+print(dt.datetime(year=2022, month=2, day=1) > dt.datetime(year=2022, month=2, day=3))

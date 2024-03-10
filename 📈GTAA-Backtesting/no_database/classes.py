@@ -8,6 +8,7 @@ __attribute and @property: read-only attribute
 import yfinance as yf
 import datetime as dt
 from dateutil import relativedelta as rd
+#import pandas as pd
 
 class Entry:
     def __init__(self, ticker: str, id: int) -> None:
@@ -34,7 +35,7 @@ class Entry:
     def set_ticker(self, newticker: str) -> None:
         self.__ticker = newticker
         self.update_name()
-        self.update_history()
+        #self.update_history()
     
     def update_name(self) -> None:
         self.__name = yf.Ticker(self.__ticker).info["longName"]
@@ -43,36 +44,49 @@ class Entry:
     def update_history(self) -> None:
         self.__history = yf.Ticker(self.ticker).history(period = "max")"""
         
-    def relative_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int)
-        history = yf.download(self.ticker, start=start - rd.relativedelta(days = average * 14), end=end)["Close"]
+    def relative_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int) -> list:
+        history = yf.download(self.ticker, start=start - dt.timedelta(days = average * 14), end=end)["Close"]
         first_valid = 0
-        while history.index[first_valid] < start:
+        while history.index[first_valid].to_pydatetime() < start:
             first_valid += 1
         sma = history[first_valid - average:first_valid].mean()
+        last_date = start
+        last_weight = weight
+        daily = []
         if sma < history[first_valid]:
-            daily = []
+            if history.index[first_valid].to_pydatetime() > start:
+                daily.append((start, weight))
             for day in range(first_valid, history.shape[0]):
-                daily.append((history.index[day], history[day]/history[first_valid]*weight))
+                while history.index[day].to_pydatetime() - last_date > dt.timedelta(days = 1):
+                    last_date += dt.timedelta(days = 1)
+                    daily.append((last_date, last_weight))
+                last_date = history.index[day].to_pydatetime()
+                last_weight = history[day]/history[first_valid]*weight
+                daily.append((last_date, last_weight))
         else:
-            daily = [(history.index[day], weight) for day in range(first_valid, history.shape[0])]
+            while start < end:
+                daily.append((start, weight))
+                start += dt.timedelta(days = 1)
+            #daily = [(history.index[day], weight) for day in range(first_valid, history.shape[0])]
         return daily
 
-    def absolute_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int, investment: float)
+    """def absolute_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int, investment: float) -> tuple:
         relative = self.relative_calculation(start, end, weight, average)
         absolute = [(day, weight * investment) for day, weight in relative]
-        return relative, absolute
+        return relative, absolute"""
         
         
         
         
 
 class Portfolio:
-    def __init__(self, entries: list, fee: float, commission: float, sma: int, initial = None, monthly = None):
+    def __init__(self, entries: list, fee: float, commission: float, average: int, initial = None, monthly = None):
         self.__entries = {i: Entry(entries[i][0], i) for i in range(len(entries))}  #tickers must be unique
         self.__weights = {i: entries[1] for i in range(len(entries))}
         self.__num_entries = len(entries)
         self.__initial = initial
         self.__monthly = monthly
+        self.__average = average
     
     @property
     def entries(self) -> dict:
@@ -83,9 +97,16 @@ class Portfolio:
     @property
     def num_entries(self) -> int:
         return self.__num_entries
+    
+    @property
+    def average(self) -> int:
+        return self.__average
 
     def changeWeight(self, id: int, new: float) -> None:
         self.__weights[id] = new
+    
+    def set_average(self, new: int) -> None:
+        self.__average = new
     
     def set_num_entries(self, new: int) -> None:
         self.__num_entries = new
@@ -100,9 +121,29 @@ class Portfolio:
         self.set_num_entries(self.num_entries - 1)
     
     def add_entry(self, ticker: str, weight: float) -> None:
-        self.__entries[self.num_entries + 1] = Entry(ticker, )
+        self.__entries[self.num_entries + 1] = Entry(ticker, self.num_entries + 1)
+        self.__weights[self.num_entries + 1] = weight
+        self.set_num_entries(self.num_entries+1)
     
-    def change_entry_ticker(self, id, newticker: str):
+    def change_entry_ticker(self, id, newticker: str) -> None:
         self.__entries[id].set_ticker(newticker)
     
-    def calculation(self, )
+    def relative_calculation(self, start: dt.datetime, end: dt.datetime) -> list:
+        cumulative = []
+        value = 1
+        while start < end:
+            current_end = start + dt.timedelta(months=1)
+            if (end - current_end)/dt.timedelta(days = 1) < 0:
+                current_end = end
+            performance = {}
+            for id in range(self.num_entries):
+                performance[id] = self.entries[id].relative_calculation(start, current_end, self.weights[id]*value, self.average)
+            number_days = len(performance[0])
+            for i in range(number_days):
+                day = (start, 0)
+                for id in performance:
+                    day[1] += performance[id][i]
+                cumulative.append(day)
+                start += dt.timedelta(days = 1)
+            value = cumulative[-1][1]
+        return cumulative
