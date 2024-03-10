@@ -63,6 +63,9 @@ class Entry:
                 last_date = history.iloc[day].name.to_pydatetime()
                 last_weight = history.iloc[day]["Close"]/history.iloc[first_valid]["Close"]*weight
                 daily.append((last_date, last_weight))
+            while end - last_date > dt.timedelta(days = 1):
+                last_date += dt.timedelta(days = 1)
+                daily.append((last_date, last_weight))
         else:
             while start < end:
                 daily.append((start, weight))
@@ -140,10 +143,12 @@ class Portfolio:
                 performance[id] = self.entries[id].relative_calculation(start, current_end, self.weights[id]*value, self.average)
             number_days = len(performance[0])
             for i in range(number_days):
-                day = [start, 0]
+                first_date = start
+                day = [first_date, 0]
                 for id in performance:
                     day[1] += performance[id][i][1]
                 cumulative.append(day)
-                start += dt.timedelta(days = 1)
+                first_date += dt.timedelta(days = 1)
             value = cumulative[-1][1]
+            start += rd.relativedelta(months = 1)
         return cumulative
