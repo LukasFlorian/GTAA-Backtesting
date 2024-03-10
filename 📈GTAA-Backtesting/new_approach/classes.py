@@ -5,6 +5,8 @@ __attribute and @property: read-only attribute
 """
 
 import sqlite3 as sql
+import yfinance as yf
+import datetime as dt
 
 class Stock:
     def __init__(self, ticker: str, name: str) -> None:
@@ -25,7 +27,15 @@ class Stock:
     def _set_name(self, newname: str) -> None:
         self.__name = newname
 
-class DB_Connection:
+class Entry(Stock):
+    def __init__(self, ticker: str, name: str, oldest: dt.datetime, newest: dt.datetime) -> None:
+        super().__init__(ticker, name)
+        self.oldest = oldest
+        self.newest = newest
+
+class DB:
+    """database connection class to use database
+    """
     def __init__(self) -> None:
         try:
             conn = sql.connect("📈GTAA-Backtesting/new_approach/gtaa_database.db")
@@ -48,18 +58,37 @@ class DB_Connection:
         self.__cur.execute("DROP TABLE Historic")
     
     def close(self) -> None:
+        """close the database connection to save resources
+        """
         self.__conn.close()
         self = None
 
-    def addStock(self, stock: Stock) -> None:
-        self.__cur.execute("INSERT INTO Stocks VALUES (\'" + stock.ticker + "\', \'" + stock.name + "\')")
-
-
+    def addStock(self, stock: Entry, earliest, last) -> None:
+        self.__cur.execute("INSERT INTO Stocks VALUES (\'" + stock.ticker + "\', \'" + stock.name + "\', \"" + stock.oldest + "\", \"" + stock.newest + "\")")
         
 
-class Entry(Stock):
-    def __init__(self, stock):
-        pass
+    def checkStock(self, ticker: str) -> None:
+        """check if a stock is in the database
+
+        Args:
+            ticker (str): _description_
+
+        Returns:
+            None: -
+        """
+        entry = self.__cur.execute("select ticker from Stocks where ticker = \"" + ticker + "\"").fetchall()
+        return bool(len(entry))
+    
+    def getKnownStocks(self) -> list:
+        """function to get a list of all stocks in the database
+
+        Returns:
+            list: list of Entry objects for stocks in the database
+        """
+        entries = self.__cur.execute("select * from Stocks").fetchall()
+        entries = [Entry(entry[0], entry[1], entry[2], entry[3]) for entry in entries]
+        return entries
+        
 
 class Portfolio:
     pass

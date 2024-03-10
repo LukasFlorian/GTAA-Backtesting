@@ -2,12 +2,8 @@
 import yfinance as yf
 import quantstats as qs
 import pandas as pd
-import sqlite3 as sql
 import streamlit as st
-from classes import Stock, DB, Entry
-
-cl.DB().dropAll()
-cl.DB().initialize_database()
+from classes import Portfolio, Entry
 
 def checkyFinance(ticker):
     """to check if a given ticker exists on yahooFinance
@@ -24,20 +20,6 @@ def checkyFinance(ticker):
         return True
     except:
         return False
-
-def stockToDatabase(ticker: str) -> None:
-    exists = checkyFinance(ticker)
-    if exists is True:
-        stock = yf.Ticker(ticker)
-        name = stock.info["longName"]
-        history = stock.history(period = "max")
-        oldest_date = history.index[0]
-        newest_date = history.index[-1]
-        stockentry = Entry(ticker, name, oldest_date, newest_date)
-        
-    else:
-        return False
-    
 
 """
 Stocks table:
