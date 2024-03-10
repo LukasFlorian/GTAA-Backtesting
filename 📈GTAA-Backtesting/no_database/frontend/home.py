@@ -1,7 +1,7 @@
 import streamlit as st
 from st_pages import Page, show_pages
 
-relative_prefix = "📈GTAA-Backtesting/no_database/frontend"
+relative_prefix = "📈GTAA-Backtesting/no_database/frontend/"
 def add_prefix(filename: str) -> str:
     return relative_prefix + filename + ".py"
 show_pages(
