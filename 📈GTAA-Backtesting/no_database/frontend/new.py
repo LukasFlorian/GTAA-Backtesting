@@ -24,13 +24,13 @@ for index, row in enumerate(st.session_state.rows):
         st.session_state.rows[index]['int'] = st.number_input(f"Integer Value Row {index+1}", value=row['int'], format="%d", key=f"int_{index}")
     with cols[1]:
         st.session_state.rows[index]['float'] = st.number_input(f"Float Value Row {index+1}", value=row['float'], format="%f", key=f"float_{index}")
+    with cols[2]:
+        st.button("Remove Row", on_click=remove_row)
 
 
-cols = st.columns([1, 1, 5])  
-with cols[0]:
-    st.button("Add Row", on_click=add_row)
-with cols[1]:
-    st.button("Remove Row", on_click=remove_row)
+
+
+st.button("Add Row", on_click=add_row)
 
 if st.button("Check if Total Floats = 100"):
     total_float = sum(row['float'] for row in st.session_state.rows)
