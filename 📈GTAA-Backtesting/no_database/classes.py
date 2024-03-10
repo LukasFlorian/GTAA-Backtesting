@@ -47,20 +47,20 @@ class Entry:
     def relative_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int) -> list:
         history = yf.download(self.ticker, start=start - dt.timedelta(days = average * 14), end=end)["Close"]
         first_valid = 0
-        while history.index[first_valid].to_pydatetime() < start:
+        while history.iloc[first_valid].name.to_pydatetime() < start:
             first_valid += 1
         sma = history[first_valid - average:first_valid].mean()
         last_date = start
         last_weight = weight
         daily = []
         if sma < history[first_valid]:
-            if history.index[first_valid].to_pydatetime() > start:
+            if history.iloc[first_valid].name.to_pydatetime() > start:
                 daily.append((start, weight))
             for day in range(first_valid, history.shape[0]):
-                while history.index[day].to_pydatetime() - last_date > dt.timedelta(days = 1):
+                while history.iloc[day].name.to_pydatetime() - last_date > dt.timedelta(days = 1):
                     last_date += dt.timedelta(days = 1)
                     daily.append((last_date, last_weight))
-                last_date = history.index[day].to_pydatetime()
+                last_date = history.iloc[day].name.to_pydatetime()
                 last_weight = history[day]/history[first_valid]*weight
                 daily.append((last_date, last_weight))
         else:
@@ -82,7 +82,7 @@ class Entry:
 class Portfolio:
     def __init__(self, entries: list, fee: float, commission: float, average: int, initial = None, monthly = None):
         self.__entries = {i: Entry(entries[i][0], i) for i in range(len(entries))}  #tickers must be unique
-        self.__weights = {i: entries[1] for i in range(len(entries))}
+        self.__weights = {i: entries[i][1] for i in range(len(entries))}
         self.__num_entries = len(entries)
         self.__initial = initial
         self.__monthly = monthly
@@ -132,7 +132,7 @@ class Portfolio:
         cumulative = []
         value = 1
         while start < end:
-            current_end = start + dt.timedelta(months=1)
+            current_end = start + rd.relativedelta(months = 1)
             if (end - current_end)/dt.timedelta(days = 1) < 0:
                 current_end = end
             performance = {}
@@ -140,9 +140,9 @@ class Portfolio:
                 performance[id] = self.entries[id].relative_calculation(start, current_end, self.weights[id]*value, self.average)
             number_days = len(performance[0])
             for i in range(number_days):
-                day = (start, 0)
+                day = [start, 0]
                 for id in performance:
-                    day[1] += performance[id][i]
+                    day[1] += performance[id][i][1]
                 cumulative.append(day)
                 start += dt.timedelta(days = 1)
             value = cumulative[-1][1]
