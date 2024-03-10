@@ -2,6 +2,7 @@ import yfinance as yf
 import datetime as dt
 from dateutil import relativedelta
 import pandas as pd
+import sqlite3 as sql
 
 
 def openConnection() -> tuple:
@@ -172,11 +173,11 @@ def updateStockData(ticker: str) -> None:
         """
         print(avList)
         latest = []
-        earliest = dt.datetime.now() - relativedelta.relativedelta(months = months)
+        earliest = dt.datetime.now() - relativedelta.relativedelta(months = num_months)
         avList = avList[::-1]
         #find first valid date that should be included in the new avList
         first_valid = 0
-        while (avList[first_valid][0] - last_date)/dt.timedelta(days = 1) < 0:
+        while (avList[first_valid][0] - last)/dt.timedelta(days = 1) < 0:
             first_valid += 1
         avList = avList[first_valid:]
         trading_days = len(avList)

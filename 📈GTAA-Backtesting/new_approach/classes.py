@@ -6,6 +6,25 @@ __attribute and @property: read-only attribute
 
 import sqlite3 as sql
 
+class Stock:
+    def __init__(self, ticker: str, name: str) -> None:
+        self.__ticker = ticker
+        self.__name = name
+    
+    @property
+    def ticker(self) -> str:
+        return self.__ticker
+    
+    @property
+    def name(self) -> str:
+        return self.__name
+    
+    def _set_ticker(self, newticker: str) -> None:
+        self.__ticker = newticker
+    
+    def _set_name(self, newname: str) -> None:
+        self.__name = newname
+
 class DB_Connection:
     def __init__(self) -> None:
         try:
@@ -35,25 +54,6 @@ class DB_Connection:
     def addStock(self, stock: Stock) -> None:
         self.__cur.execute("INSERT INTO Stocks VALUES (\'" + stock.ticker + "\', \'" + stock.name + "\')")
 
-
-class Stock:
-    def __init__(self, ticker: str, name: str) -> None:
-        self.__ticker = ticker
-        self.__name = name
-    
-    @property
-    def ticker(self) -> str:
-        return self.__ticker
-    
-    @property
-    def name(self) -> str:
-        return self.__name
-    
-    def _set_ticker(self, newticker: str) -> None:
-        self.__ticker = newticker
-    
-    def _set_name(self, newname: str) -> None:
-        self.__name = newname
 
         
 

@@ -3,6 +3,7 @@ import yfinance as yf
 import quantstats as qs
 import pandas as pd
 import sqlite3 as sql
+import streamlit as st
 
 # extend pandas functionality with metrics, etc.
 qs.extend_pandas()
@@ -20,8 +21,9 @@ qs.reports.html(stock, "SPY", output = "report.html")
 
 historic_data = yf.Ticker("META").history(period = "max")
 print(type(historic_data))
-print(historic_data.index[0])
-print(historic_data.index[-1])
+print(historic_data.index[0]) #oldest
+print(historic_data.index[-1]) #newest
+print(historic_data.shape) #(rows, cols)
 
 def openConnection() -> tuple:
     """used to open database connection, informs about status of connection (successful or not)
