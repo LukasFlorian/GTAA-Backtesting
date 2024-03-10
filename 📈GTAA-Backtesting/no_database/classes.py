@@ -45,15 +45,15 @@ class Entry:
         self.__history = yf.Ticker(self.ticker).history(period = "max")"""
         
     def relative_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int) -> list:
-        history = yf.download(self.ticker, start=start - dt.timedelta(days = average * 14), end=end)["Close"]
+        history = yf.download(self.ticker, start=start - dt.timedelta(days = average * 14), end=end)
         first_valid = 0
         while history.iloc[first_valid].name.to_pydatetime() < start:
             first_valid += 1
-        sma = history[first_valid - average:first_valid].mean()
+        sma = history[first_valid - average:first_valid]["Close"].mean()
         last_date = start
         last_weight = weight
         daily = []
-        if sma < history[first_valid]:
+        if sma < history.iloc[first_valid]["Close"]:
             if history.iloc[first_valid].name.to_pydatetime() > start:
                 daily.append((start, weight))
             for day in range(first_valid, history.shape[0]):
@@ -61,7 +61,7 @@ class Entry:
                     last_date += dt.timedelta(days = 1)
                     daily.append((last_date, last_weight))
                 last_date = history.iloc[day].name.to_pydatetime()
-                last_weight = history[day]/history[first_valid]*weight
+                last_weight = history.iloc[day]["Close"]/history.iloc[first_valid]["Close"]*weight
                 daily.append((last_date, last_weight))
         else:
             while start < end:
