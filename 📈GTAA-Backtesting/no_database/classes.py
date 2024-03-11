@@ -45,7 +45,7 @@ class Entry:
         self.__history = yf.Ticker(self.ticker).history(period = "max")"""
         
     def relative_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int) -> list:
-        history = yf.download(self.ticker, start=start - dt.timedelta(days = average * 14), end=end)
+        history = yf.download(self.ticker, start=start - dt.timedelta(days = average), end=end)
         first_valid = 0
         while history.iloc[first_valid].name.to_pydatetime() < start:
             first_valid += 1
@@ -71,6 +71,25 @@ class Entry:
                 daily.append((start, weight))
                 start += dt.timedelta(days = 1)
             #daily = [(history.index[day], weight) for day in range(first_valid, history.shape[0])]
+        return daily
+
+    def buy_and_hold(self, start: dt.datetime, end: dt.datetime, weight: int, average: int) -> list:
+        history = yf.download(self.ticker, start=start, end=end)
+        last_date = start
+        last_weight = weight
+        daily = []
+        if history.iloc[0].name.to_pydatetime() > start:
+            daily.append((start, weight))
+        for day in range(history.shape[0]):
+            while history.iloc[day].name.to_pydatetime() - last_date > dt.timedelta(days = 1):
+                last_date += dt.timedelta(days = 1)
+                daily.append((last_date, last_weight))
+            last_date = history.iloc[day].name.to_pydatetime()
+            last_weight = history.iloc[day]["Close"]/history.iloc[0]["Close"]*weight
+            daily.append((last_date, last_weight))
+        while end - last_date > dt.timedelta(days = 1):
+            last_date += dt.timedelta(days = 1)
+            daily.append((last_date, last_weight))
         return daily
 
     """def absolute_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int, investment: float) -> tuple:
@@ -131,7 +150,7 @@ class Portfolio:
     def change_entry_ticker(self, id, newticker: str) -> None:
         self.__entries[id].set_ticker(newticker)
     
-    def relative_calculation(self, start: dt.datetime, end: dt.datetime) -> list:
+    def gtaa_relative_calculation(self, start: dt.datetime, end: dt.datetime) -> list:
         cumulative = []
         value = 1
         while start < end:
@@ -142,8 +161,8 @@ class Portfolio:
             for id in range(self.num_entries):
                 performance[id] = self.entries[id].relative_calculation(start, current_end, self.weights[id]*value, self.average)
             number_days = len(performance[0])
+            first_date = start
             for i in range(number_days):
-                first_date = start
                 day = [first_date, 0]
                 for id in performance:
                     day[1] += performance[id][i][1]
@@ -151,4 +170,20 @@ class Portfolio:
                 first_date += dt.timedelta(days = 1)
             value = cumulative[-1][1]
             start += rd.relativedelta(months = 1)
+        return cumulative
+    
+    def buy_and_hold_relative_calculation(self, start: dt.datetime, end: dt.datetime) -> list:
+        cumulative = []
+        value = 1
+        performance = {}
+        for id in range(self.num_entries):
+            performance[id] = self.entries[id].buy_and_hold(start, end, self.weights[id]*value, self.average)
+        number_days = len(performance[0])
+        first_date = start
+        for i in range(number_days):
+            day = [first_date, 0]
+            for id in performance:
+                day[1] += performance[id][i][1]
+            cumulative.append(day)
+            first_date += dt.timedelta(days = 1)
         return cumulative
