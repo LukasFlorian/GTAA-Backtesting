@@ -1,7 +1,7 @@
 import streamlit as st
 from backend.classes import Portfolio
 from backend.shared import *
-from st_pages import Page, show_pages
+from st_pages import Page
 
 st.title("🆕 Create a New Portfolio")
 

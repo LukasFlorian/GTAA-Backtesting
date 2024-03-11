@@ -185,7 +185,7 @@ class Portfolio:
             performance[id] = self.entries[id].buy_and_hold(start, end, self.weights[id], self.average)
         number_days = len(performance[0])
         for i in range(number_days):
-            day = [first_date, 0]
+            day = [start, 0]
             for id in performance:
                 day[1] += performance[id][i][1]
             cumulative.append(day)
