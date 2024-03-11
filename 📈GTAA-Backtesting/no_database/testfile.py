@@ -46,7 +46,7 @@ print(test - rd.relativedelta(years = 1))"""
 #print(dt.datetime(year=2022, month=2, day=1) > dt.datetime(year=2022, month=2, day=3))
 
 from classes import Entry, Portfolio
-test = Portfolio([("^GSPC", 0.2), ("EFA", 0.2), ("GLD", 0.2), ("O", 0.2), ("IEF", 0.2)], 0, 0, 200, 500, 200)
+test = Portfolio(entries = [("^GSPC", 0.2), ("EFA", 0.2), ("GLD", 0.2), ("O", 0.2), ("IEF", 0.2)], average = 200, name = "mytest")
 start = dt.datetime(year = 2005, month = 1, day = 1)
 #end = dt.datetime(year = 2021, month = 3, day = 1)
 end = dt.datetime.now()

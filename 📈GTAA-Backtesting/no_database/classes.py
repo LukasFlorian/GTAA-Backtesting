@@ -102,13 +102,12 @@ class Entry:
         
 
 class Portfolio:
-    def __init__(self, entries: list, fee: float, commission: float, average: int, initial = None, monthly = None):
+    def __init__(self, entries: list, average: int, name: str):
         self.__entries = {i: Entry(entries[i][0], i) for i in range(len(entries))}  #tickers must be unique
         self.__weights = {i: entries[i][1] for i in range(len(entries))}
         self.__num_entries = len(entries)
-        self.__initial = initial
-        self.__monthly = monthly
         self.__average = average
+        self.__name = name
     
     @property
     def entries(self) -> dict:
@@ -119,10 +118,12 @@ class Portfolio:
     @property
     def num_entries(self) -> int:
         return self.__num_entries
-    
     @property
     def average(self) -> int:
         return self.__average
+    @property
+    def name(self) -> str:
+        return self.__name
 
     def changeWeight(self, id: int, new: float) -> None:
         self.__weights[id] = new
@@ -132,6 +133,9 @@ class Portfolio:
     
     def set_num_entries(self, new: int) -> None:
         self.__num_entries = new
+    
+    def set_name(self, new: str) -> None:
+        self.__name = new
     
     def deleteEntry(self, id: int) -> None:
         for i in range(id+1, self.num_entries):
