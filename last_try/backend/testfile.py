@@ -47,7 +47,7 @@ print(test - rd.relativedelta(years = 1))"""
 
 from classes import Portfolio
 test = Portfolio(entries = [("^GSPC", 0.2), ("EFA", 0.2), ("GLD", 0.2), ("O", 0.2), ("IEF", 0.2)], average = 200, name = "mytest")
-start = dt.datetime(year = 2020, month = 1, day = 1)
+start = dt.datetime(year = 2024, month = 1, day = 1)
 #end = dt.datetime(year = 2021, month = 3, day = 1)
 end = dt.datetime.now()
 
@@ -55,4 +55,4 @@ gtaa = test.gtaa_relative_calculation(start, end)
 b_h = test.buy_and_hold_relative_calculation(start, end)
 #print("gtaa:", gtaa[-1][1])
 #print("b & h:", b_h[-1][1])
-print(b_h)
+print(gtaa)
