@@ -1,55 +1,41 @@
-from backend.shared import *
 import streamlit as st
+from shared import portfolios, add_prefix, checkyFinance
 import pandas as pd
-import matplotlib.pyplot as plt
-import datetime as dt
-
-#portfolios = shared.Portfoliolist.portfolios
-#You don't need to define portfolios, it is defined in shared, which has been imported
+import time
+import os
 
 
-# Function to generate pie chart for portfolio composition
-def plot_pie_chart(portfolio):
-    weights = portfolio.weights  # Dictionary of weights
-    stock_names = [portfolio.entries[i].name for i in portfolio.entries]  # List of stock names
-    sizes = [weights[i] for i in weights]  # List of weights corresponding to stock names
+st.title("Portfolio Calculation")
 
-    fig, ax = plt.subplots()
-    ax.pie(sizes, labels=stock_names, autopct='%1.1f%%')
-    ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
-    return fig
+portfolio_options = [portfolio.name for portfolio in portfolios.list]  
 
-# Function to generate performance diagram
-def plot_performance_diagram(portfolio):
-    start = dt.datetime(year=2024, month=1, day=1)
-    end = dt.datetime.now()
-    performance_data = portfolio.gtaa_relative_calculation(start, end)
+selected_portfolios = st.multiselect("Select Portfolio(s)", options=portfolio_options, default=None)
 
-    # Example performance data structure (adjust according to your actual data structure)
-    # performance_data = {'dates': [date_list], 'values': [value_list]}
+calc_button = st.button("Perform Calculation")
 
-    fig, ax = plt.subplots()
-    ax.plot(performance_data['dates'], performance_data['values'])
-    ax.set_title("Portfolio Performance Over Time")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Performance")
-    return fig
+if calc_button:
+    if not selected_portfolios:
+        st.warning("Please select at least one portfolio.")
+    else:
 
-# Streamlit UI
-st.title('Portfolios Page')
+        result_file_path = perform_calculation(selected_portfolios)
+        
 
-# Dropdown to select a portfolio
-selected_portfolio_name = st.selectbox('Select a Portfolio', [portfolio.name for portfolio in portfolios])
-selected_portfolio = next((portfolio for portfolio in portfolios if portfolio.name == selected_portfolio_name), None)
+        with st.spinner('Calculating...'):
+            time.sleep(2)  
 
-if selected_portfolio:
-    # Plotting the pie chart for the selected portfolio
-    pie_chart_fig = plot_pie_chart(selected_portfolio)
-    st.pyplot(pie_chart_fig)
+        if os.path.exists(result_file_path):
 
-    # Plotting the performance diagram for the selected portfolio
-    performance_fig = plot_performance_diagram(selected_portfolio)
-    st.pyplot(performance_fig)
+            with open(result_file_path, "rb") as file:
+                btn = st.download_button(
+                        label="Download Calculation Result",
+                        data=file,
+                        file_name="calculation_result.html",
+                        mime="text/html"
+                    )
+        else:
+            st.error()
+
 
 
 '''
