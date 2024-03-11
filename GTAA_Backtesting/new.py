@@ -1,7 +1,6 @@
 import streamlit as st
 from backend.classes import Portfolio
 from backend.shared import *
-from st_pages import Page
 
 st.title("🆕 Create a New Portfolio")
 
@@ -14,10 +13,6 @@ def add_row():
 def remove_row(index):
     if 'rows' in st.session_state and len(st.session_state.rows) > 0:
         st.session_state.rows.pop(index)
-
-def create_portfolio_list():
-    portfolio_list = [(row['ticker'], row['weight']) for row in st.session_state.rows]
-    portfolios.addPortfolio(portfolio = Portfolio(entries = portfolio_list, average = average, name = name))
 
 
 name = st.text_input(label = "What should your portfolio be called?")
@@ -45,8 +40,10 @@ if total_weight == 100:
         for row in st.session_state.rows:
             allTickers = bool(checkyFinance(ticker=row["ticker"]) == allTickers)
         if allTickers == True and name != "":
-            create_portfolio_list()
-            st.write("Portfolio created.")
+            portfolio_list = [(row['ticker'], row['weight']) for row in st.session_state.rows]
+            portfolios.addPortfolio(portfolio = Portfolio(entries = portfolio_list, average = average, name = name))
+            print(portfolios.num_portfolios)
+            st.success("Portfolio created.")
             st.write("Create another portfolio or head to the \"📊 My Allocations\" section in the sidebar to look at the data for your portfolio.")
         else:
             st.error("Portfolio not created. Please make sure the portfolio name is not empty and that all tickers are valid and exist on yahooFinance.")

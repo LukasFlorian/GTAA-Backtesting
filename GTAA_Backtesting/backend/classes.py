@@ -100,7 +100,7 @@ class Portfolio:
     def __init__(self, entries: list, average: int, name: str):
         self.__entries = {i: Entry(entries[i][0], i) for i in range(len(entries))}  #tickers must be unique
         self.__weights = {i: entries[i][1] for i in range(len(entries))}
-        self.__num_entries = len(entries)
+        self.__num_entries = len(entries)-1
         self.__average = average
         self.__name = name
         self.__id = None
@@ -198,7 +198,7 @@ class Portfolio:
 class Portfoliolist:
     def __init__(self, portfolios: list):
         self.__portfolios = {i: portfolios[i] for i in range(len(portfolios))}
-        self.__num_portfolios = len(portfolios)
+        self.__num_portfolios = len(portfolios)-1
     
     @property
     def portfolios(self) -> dict:
@@ -213,6 +213,7 @@ class Portfoliolist:
     def addPortfolio(self, portfolio: Portfolio) -> None:
         portfolio.set_id(self.num_portfolios + 1)
         self.__portfolios[self.num_portfolios + 1] = portfolio
+        self.set_num_portfolios(self.num_portfolios + 1)
     
     def deletePortfolio(self, id: int) -> None:
         for i in range(id+1, self.num_portfolios):
