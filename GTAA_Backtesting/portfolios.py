@@ -1,10 +1,12 @@
-import shared
+from backend.shared import *
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime as dt
 
-portfolios = shared.Portfoliolist.portfolios
+#portfolios = shared.Portfoliolist.portfolios
+#You don't need to define portfolios, it is defined in shared, which has been imported
+
 
 # Function to generate pie chart for portfolio composition
 def plot_pie_chart(portfolio):
