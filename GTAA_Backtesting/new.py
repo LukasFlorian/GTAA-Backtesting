@@ -1,7 +1,7 @@
 import streamlit as st
 from backend.classes import Portfolio
 from backend.shared import *
-from st_pages import Page
+from st_pages import Page, show_pages
 
 st.title("🆕 Create a New Portfolio")
 
@@ -18,9 +18,6 @@ def remove_row(index):
 def create_portfolio_list():
     portfolio_list = [(row['ticker'], row['weight']) for row in st.session_state.rows]
     portfolios.addPortfolio(portfolio = Portfolio(entries = portfolio_list, average = average, name = name))
-    """# Join each tuple into a string and then join all strings into one to display
-    portfolio_list_str = ', '.join([f"('{ticker}', {weight})" for ticker, weight in portfolio_list])
-    st.text(f"[{portfolio_list_str}]")"""
 
 
 name = st.text_input(label = "What should your portfolio be called?")
@@ -43,11 +40,16 @@ st.button("Add Row", on_click=add_row)
 # Automatic total weight check after each change
 total_weight = sum(row['weight'] for row in st.session_state.rows)
 if total_weight == 100:
-    allTickers = True
-    for row in st.session_state.rows:
-        allTickers = checkyFinance(ticker=row["ticker"]) and allTickers
-    if allTickers is True and name != "" and st.button("Create Portfolio List"):
-        create_portfolio_list()
+    if st.button("Create Portfolio"):
+        allTickers = True
+        for row in st.session_state.rows:
+            allTickers = bool(checkyFinance(ticker=row["ticker"]) == allTickers)
+        if allTickers == True and name != "":
+            create_portfolio_list()
+            st.write("Portfolio created.")
+            st.write("Create another portfolio or head to the \"📊 My Allocations\" section in the sidebar to look at the data for your portfolio.")
+        else:
+            st.error("Portfolio not created. Please make sure the portfolio name is not empty and that all tickers are valid and exist on yahooFinance.")
 elif total_weight < 100:
     st.error(f"Total weight is less than 100% ({total_weight}%)")
 else:

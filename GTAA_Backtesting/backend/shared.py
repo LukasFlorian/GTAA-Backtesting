@@ -17,9 +17,8 @@ def checkyFinance(ticker: str):
     Returns:
         bool: True if ticker exists, otherwise False
     """
-    ticker = yf.Ticker(ticker)
     try:
-        info = ticker.info
-        return True
+        name = yf.Ticker(ticker).info["longName"]
     except:
         return False
+    return True
