@@ -5,21 +5,7 @@ import pandas as pd
 import streamlit as st
 from classes import Portfolio, Entry
 
-def checkyFinance(ticker):
-    """to check if a given ticker exists on yahooFinance
 
-    Args:
-        ticker (str): ticker to check
-
-    Returns:
-        bool: True if ticker exists, otherwise False
-    """
-    ticker = yf.Ticker(ticker)
-    try:
-        info = ticker.info
-        return True
-    except:
-        return False
 
 """
 Stocks table:

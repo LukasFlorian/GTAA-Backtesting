@@ -1,6 +1,6 @@
 import streamlit as st
-from classes import Portfolio
-from shared import portfolios
+from backend.classes import Portfolio
+from backend.shared import *
 from st_pages import Page
 
 st.title("🆕 Create a New Portfolio")
@@ -17,15 +17,15 @@ def remove_row(index):
 
 def create_portfolio_list():
     portfolio_list = [(row['ticker'], row['weight']) for row in st.session_state.rows]
-    portfolios.append(Portfolio(entries = portfolio_list, average = average, name = name))
+    portfolios.addPortfolio(portfolio = Portfolio(entries = portfolio_list, average = average, name = name))
     """# Join each tuple into a string and then join all strings into one to display
     portfolio_list_str = ', '.join([f"('{ticker}', {weight})" for ticker, weight in portfolio_list])
     st.text(f"[{portfolio_list_str}]")"""
 
 
 name = st.text_input(label = "What should your portfolio be called?")
-average = st.text_input(label = "How many trading days should the SMA include?")
-
+average = st.number_input(label = "How many trading days should the SMA include?", min_value=7, max_value=252)
+st.subheader("Positions:")
 if 'rows' not in st.session_state:
     add_row()
 
@@ -43,12 +43,12 @@ st.button("Add Row", on_click=add_row)
 # Automatic total weight check after each change
 total_weight = sum(row['weight'] for row in st.session_state.rows)
 if total_weight == 100:
-    st.success("Total weight is exactly 100%")
-    # Display the button for creating a portfolio list when the total weight is exactly 100%
-    if st.button("Create Portfolio List"):
+    allTickers = True
+    for row in st.session_state.rows:
+        allTickers = checkyFinance(ticker=row["ticker"]) and allTickers
+    if allTickers is True and name != "" and st.button("Create Portfolio List"):
         create_portfolio_list()
-        Page(add_prefix("portfolios"), "My Allocations", "📊")
 elif total_weight < 100:
-    st.warning(f"Total weight is less than 100% ({total_weight}%)")
+    st.error(f"Total weight is less than 100% ({total_weight}%)")
 else:
     st.error(f"Total weight exceeds 100% ({total_weight}%)")

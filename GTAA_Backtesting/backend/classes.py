@@ -108,6 +108,7 @@ class Portfolio:
         self.__num_entries = len(entries)
         self.__average = average
         self.__name = name
+        self.__id = None
     
     @property
     def entries(self) -> dict:
@@ -124,6 +125,12 @@ class Portfolio:
     @property
     def name(self) -> str:
         return self.__name
+    @property
+    def id(self) -> int:
+        return self.__id
+    
+    def set_id(self, new: int) -> None:
+        self.__id = new
 
     def changeWeight(self, id: int, new: float) -> None:
         self.__weights[id] = new
@@ -191,3 +198,29 @@ class Portfolio:
             cumulative.append(day)
             first_date += dt.timedelta(days = 1)
         return cumulative
+
+class Portfoliolist:
+    def __init__(self, portfolios: list):
+        self.__portfolios = {i: portfolios[i] for i in range(len(portfolios))}
+        self.__num_portfolios = len(portfolios)
+    
+    @property
+    def portfolios(self) -> dict:
+        return self.__portfolios
+    @property
+    def num_portfolios(self) -> int:
+        return self.__num_portfolios
+    
+    def set_num_portfolios(self, new: int) -> None:
+        self.__num_portfolios = new
+    
+    def addPortfolio(self, portfolio: Portfolio) -> None:
+        portfolio.set_id(self.num_portfolios + 1)
+        self.__portfolios[self.num_portfolios + 1] = portfolio
+    
+    def deletePortfolio(self, id: int) -> None:
+        for i in range(id+1, self.num_portfolios):
+            self.__portfolios[i].set_id(i-1)
+            self.__portfolios[i-1] = self.__portfolios[i]
+        del self.__portfolios[self.num_portfolios]
+        self.set_num_portfolios(self.num_portfolios - 1)
