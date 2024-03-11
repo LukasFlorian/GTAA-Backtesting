@@ -91,11 +91,6 @@ class Entry:
             last_date += dt.timedelta(days = 1)
             daily.append((last_date, last_weight))
         return daily
-
-    """def absolute_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int, investment: float) -> tuple:
-        relative = self.relative_calculation(start, end, weight, average)
-        absolute = [(day, weight * investment) for day, weight in relative]
-        return relative, absolute"""
         
         
         
@@ -185,19 +180,20 @@ class Portfolio:
     
     def buy_and_hold_relative_calculation(self, start: dt.datetime, end: dt.datetime) -> list:
         cumulative = []
-        value = 1
         performance = {}
         for id in range(self.num_entries):
-            performance[id] = self.entries[id].buy_and_hold(start, end, self.weights[id]*value, self.average)
+            performance[id] = self.entries[id].buy_and_hold(start, end, self.weights[id], self.average)
         number_days = len(performance[0])
-        first_date = start
         for i in range(number_days):
             day = [first_date, 0]
             for id in performance:
                 day[1] += performance[id][i][1]
             cumulative.append(day)
-            first_date += dt.timedelta(days = 1)
+            start += dt.timedelta(days = 1)
         return cumulative
+
+
+
 
 class Portfoliolist:
     def __init__(self, portfolios: list):
