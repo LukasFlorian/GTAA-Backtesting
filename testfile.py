@@ -72,8 +72,15 @@ def checkRequirements(tickercount: int) -> tuple:
                     valid = False
                     break
         if valid is True:
+            if sum(weights) != 100:
+                Label(root, text = "Please make sure all weights add up to 100.").grid(row = 5 + (tickercount-1)*2, column = 1)
+                valid = False
+        if valid is True:
+            
             entries = [(tickers[i], weights[i]) for i in range(len(tickers))]
             portfolios.addPortfolio(Portfolio(entries=entries, average=average, name=name))
+            root.destroy()
+            calculation_window()
 
 def reset_main():
     root.destroy()
@@ -87,14 +94,23 @@ def createTickerSection(tickercount: int) -> None:
             ticker_section(startrow = 4 + 2*i)
         Button(root, text = "Reset Inputs (Existing strategies are preserved.)", command = reset_main).grid(row = 4 + (tickercount-1)*2, column = 0)
         Button(root, text = "Create Strategy", command = lambda: checkRequirements(tickercount)).grid(row = 5 + (tickercount-1)*2, column = 0)
+        
 
+def to_calculation_window():
+    root.destroy()
+    calculation_window()
+
+def back_to_main(window: Tk):
+    window.destroy()
+    main()
 
 def main():
     global root, name, sma
     root = Tk()
     root.title("GTAA Backtesting Tool by Lukas Florian Richter & Nemanja Cerovac")    
     Label(root, text = "Here you can backtest your GTAA strategies with custom securities and SMAs to use.").grid(row = 0, column = 0, columnspan=4)
-
+    Button(root, text = "To calculation page", command = lambda: to_calculation_window()).grid(row = 2, column = 0)
+    Button(root, text = "Quit", command = root.destroy).grid(row = 3, column = 0)
     #new portfolio section
     Label(root, text = "Create a new strategy in this section:").grid(row = 1, column = 0)
     Label(root, text = "Please name your strategy here:").grid(row = 1, column = 1)
@@ -111,14 +127,21 @@ def main():
 
     Button(root, text = "Enter Securities", command= lambda: createTickerSection(get_numberinput(tickerinput))).grid(row = 3, column = 3)
     #lambda because otherwise tkinter would run the command immediately after creating the button
-
-    if portfolios.num_portfolios >= 1:
-        pass
-
-
     root.mainloop()
 
 def calculation_window():
-    pass
+    app = Tk()
+    app.title("Analyse your strategies")
+    Button(app, text = "Back to strategy creation window", command = lambda: back_to_main(app)).grid(row = 0, column=0, columnspan=2)
+    Label(text = "Select one strategy to create an analysis using the Buy and Hold strategy as a Benchmark.").grid(row = 1, column = 0, columnspan=2)
+    Label(text = "Or select two portfolios to compare them.").grid(row = 2, column = 0, columnspan=2)
+    optionlist = [name for name in portfolios.portfolios]
+    default = StringVar(app, value = "No strategy chosen")
+    default.set(optionlist[0])
+    
+    name1 = OptionMenu(app, variable=default, *optionlist)
+    name1.grid(row = 3, column = )
+    app.mainloop()
+    
 
 main()

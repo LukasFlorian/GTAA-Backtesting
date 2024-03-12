@@ -151,13 +151,11 @@ class Entry:
 
 
 class Portfolio:
-    def __init__(self, entries: list, average: int, name: str):
+    def __init__(self, entries: list, average: int):
         self.__entries = {i: Entry(entries[i][0], i) for i in range(len(entries))}  #tickers must be unique
         self.__weights = {i: entries[i][1] for i in range(len(entries))}
         self.__num_entries = len(entries)-1
         self.__average = average
-        self.__name = name
-        self.__id = None
     
     @property
     def entries(self) -> dict:
@@ -171,15 +169,6 @@ class Portfolio:
     @property
     def average(self) -> int:
         return self.__average
-    @property
-    def name(self) -> str:
-        return self.__name
-    @property
-    def id(self) -> int:
-        return self.__id
-    
-    def set_id(self, new: int) -> None:
-        self.__id = new
 
     def changeWeight(self, id: int, new: float) -> None:
         self.__weights[id] = new
@@ -189,9 +178,6 @@ class Portfolio:
     
     def set_num_entries(self, new: int) -> None:
         self.__num_entries = new
-    
-    def set_name(self, new: str) -> None:
-        self.__name = new
     
     def deleteEntry(self, id: int) -> None:
         for i in range(id+1, self.num_entries):
@@ -234,21 +220,13 @@ class Portfolio:
 
 class Portfoliolist:
     def __init__(self, portfolios: list):
-        self.__portfolios = {i: portfolios[i] for i in range(len(portfolios))}
-        self.__num_portfolios = len(portfolios)-1
+        self.__portfolios = {name: portfolio for name, portfolio in portfolios}
     
     @property
     def portfolios(self) -> dict:
         return self.__portfolios
-    @property
-    def num_portfolios(self) -> int:
-        return self.__num_portfolios
-    
-    def set_num_portfolios(self, new: int) -> None:
-        self.__num_portfolios = new
     
     def addPortfolio(self, portfolio: Portfolio) -> None:
-        portfolio.set_id(self.num_portfolios + 1)
         self.__portfolios[self.num_portfolios + 1] = portfolio
         self.set_num_portfolios(self.num_portfolios + 1)
     
