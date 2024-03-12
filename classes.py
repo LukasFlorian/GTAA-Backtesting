@@ -226,10 +226,9 @@ class Portfoliolist:
     def portfolios(self) -> dict:
         return self.__portfolios
     
-    def addPortfolio(self, portfolio: Portfolio) -> None:
-        self.__portfolios[self.num_portfolios + 1] = portfolio
-        self.set_num_portfolios(self.num_portfolios + 1)
+    def addPortfolio(self, portfolio: Portfolio, name: str) -> None:
+        self.__portfolios[name] = portfolio
     
-    def performCalulation(self, id: int, start: dt.date, end: dt.date) -> None:
-        gtaa, bh = self.portfolios[id].relative_calculation(start, end)
+    def performCalulation(self, name: str, start: dt.date, end: dt.date) -> None:
+        gtaa, bh = self.portfolios[name].relative_calculation(start, end)
         return gtaa, bh

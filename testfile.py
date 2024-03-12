@@ -4,6 +4,8 @@ import pandas as pd
 from classes import Portfoliolist, Portfolio
 from tkinter import *
 import yfinance as yf
+import webview
+import os
 
 """
 ticker1 = "^GSPC"
@@ -30,9 +32,9 @@ qs.reports.html(returns = gtaa, benchmark=bh, title = "metatest", output='local/
 def checkyFinance(ticker: str):
     try:
         name = yf.Ticker(ticker).info["longName"]
+        return True
     except:
         return False
-    return True
 
 def ticker_section(startrow: int) -> None:
     Label(root, text = "Provide a security ticker and the weight it should have in your portfolio:").grid(row = startrow, column = 1)
@@ -76,12 +78,15 @@ def checkRequirements(tickercount: int) -> tuple:
                 Label(root, text = "Please make sure all weights add up to 100.").grid(row = 5 + (tickercount-1)*2, column = 1)
                 valid = False
         if valid is True:
-            
+            if name.get() in portfolios.portfolios.keys() or name.get() == "None":
+                Label(root, text = "Please make sure the strategy name is unique and is not \"None\".").grid(row = 5 + (tickercount-1)*2, column = 1)
+                valid = False
+        if valid is True:
             entries = [(tickers[i], weights[i]) for i in range(len(tickers))]
-            portfolios.addPortfolio(Portfolio(entries=entries, average=average, name=name))
+            portfolios.addPortfolio(Portfolio(entries=entries, average=average), name.get())
             root.destroy()
             calculation_window()
-
+            
 def reset_main():
     root.destroy()
     main()
@@ -129,19 +134,51 @@ def main():
     #lambda because otherwise tkinter would run the command immediately after creating the button
     root.mainloop()
 
+def analyse(name1: Entry, name2: Entry) -> None:
+    p1, p2 = name.get(), name2.get()
+    if p1 == "None" and p2 == "None":
+        Label(text = "You have to select at least one strategy.").grid(row = 5, column= 0, columnspan=2)
+    if p1 == "None" and p2 != "None":
+        gtaa, bh = Portfoliolist.performCalulation(name = p2, start = dt.date(1900,1,1), end = dt.date.today())
+        Label(text = "Please be very patient, this may take a while.").grid(row = 5, column= 0, columnspan=2)
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        qs.reports.html(returns=gtaa, benchmark=bh, title = p1 + " vs. Buy & Hold", output= p1 + "vsB&H.html")
+        webview.create_window("My Analysis", dir_path + p1 + "vsB&H.html")
+        
+    
+
 def calculation_window():
     app = Tk()
     app.title("Analyse your strategies")
     Button(app, text = "Back to strategy creation window", command = lambda: back_to_main(app)).grid(row = 0, column=0, columnspan=2)
     Label(text = "Select one strategy to create an analysis using the Buy and Hold strategy as a Benchmark.").grid(row = 1, column = 0, columnspan=2)
     Label(text = "Or select two portfolios to compare them.").grid(row = 2, column = 0, columnspan=2)
-    optionlist = [name for name in portfolios.portfolios]
-    default = StringVar(app, value = "No strategy chosen")
-    default.set(optionlist[0])
+    optionList = ["None"] + list(portfolios.portfolios.keys())
+    variable = StringVar(app, value = None)
+    variable.set(optionList[0])
+    name1 = OptionMenu(app, variable, *optionList)
+    name1.grid(row = 3, column = 0)
+    name2 = OptionMenu(app, variable, *optionList)
+    name2.grid(row = 3, column = 1)
+    Button(app, text = "Generate Analysis", command = lambda: analyse(name1, name2)).grid(row = 4, column = 0, columnspan=2)
     
-    name1 = OptionMenu(app, variable=default, *optionlist)
-    name1.grid(row = 3, column = )
+    
     app.mainloop()
-    
 
 main()
+
+
+"""OptionList = ["Aries", "Taurus", "Gemini", "Cancer"]
+
+app = Tk()
+
+app.geometry("100x200")
+
+variable = StringVar(app)
+variable.set(OptionList[0])
+
+opt = OptionMenu(app, variable, *OptionList)
+opt.config(width=90, font=("Helvetica", 12))
+opt.pack()
+
+app.mainloop()"""
