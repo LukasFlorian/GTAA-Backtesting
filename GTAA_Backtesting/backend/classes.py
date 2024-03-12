@@ -8,6 +8,7 @@ __attribute and @property: read-only attribute
 import yfinance as yf
 import datetime as dt
 from dateutil import relativedelta as rd
+import quantstats as qs
 #import pandas as pd
 
 class Entry:
@@ -43,6 +44,14 @@ class Entry:
     """
     def update_history(self) -> None:
         self.__history = yf.Ticker(self.ticker).history(period = "max")"""
+        
+    def calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int) -> list:
+        history = qs.utils.download_returns(self.ticker, period = "max").loc[start - dt.timedelta(days = average):end]
+        first_valid = 0
+        while history.iloc[first_valid].name.to_pydatetime() < start:
+            first_valid += 1
+        sma = history[first_valid - average:first_valid]["Close"]
+        
         
     def relative_calculation(self, start: dt.datetime, end: dt.datetime, weight: int, average: int) -> list:
         history = yf.download(self.ticker, start=start - dt.timedelta(days = average), end=end)

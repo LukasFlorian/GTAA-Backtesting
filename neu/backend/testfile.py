@@ -68,14 +68,19 @@ def listToDf(list: list) -> pd.DataFrame:
     #dataframe = pd.DataFrame(list, columns = ["Date", "Return"])
     return dataframe
 
-portfolio = Portfolio(entries = [("META", 1)], average = 200, name = "mine")
+"""portfolio = Portfolio(entries = [("META", 1)], average = 200, name = "mine")
 earliest = portfolio.get_earliest()
 gtaa = portfolio.gtaa_relative_calculation(start=earliest, end = dt.datetime.now())
 bh = portfolio.buy_and_hold_relative_calculation(start=earliest, end = dt.datetime.now())
 gtaa, bh = listToDf(gtaa).Returns, listToDf(bh).Returns
 print(gtaa)
-print(bh)
-qs.reports.html(gtaa, title = portfolio.name, output = portfolio.name + ".html", download_filename = "profit.html")
+print(bh)"""
+start = dt.datetime(2020,1,1)
+end = dt.datetime.now()
+average = 200
+history = qs.utils.download_returns("META", period = "max").loc[start - dt.timedelta(days = average):end]
+print(history)
+#qs.reports.html(gtaa, title = portfolio.name, output = portfolio.name + ".html", download_filename = "profit.html")
 """start_amount = 100000
 
 np.random.seed(8)
