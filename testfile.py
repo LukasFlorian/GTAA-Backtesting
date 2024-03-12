@@ -4,7 +4,7 @@ import pandas as pd
 from classes import Portfoliolist, Portfolio
 from tkinter import *
 import yfinance as yf
-import webview
+import webbrowser
 import os
 
 """
@@ -135,15 +135,28 @@ def main():
     root.mainloop()
 
 def analyse(name1: Entry, name2: Entry) -> None:
-    p1, p2 = name.get(), name2.get()
+    p1, p2 = name1.get(), name2.get()
     if p1 == "None" and p2 == "None":
         Label(text = "You have to select at least one strategy.").grid(row = 5, column= 0, columnspan=2)
-    if p1 == "None" and p2 != "None":
-        gtaa, bh = Portfoliolist.performCalulation(name = p2, start = dt.date(1900,1,1), end = dt.date.today())
+    elif p1 == "None" and p2 != "None":
         Label(text = "Please be very patient, this may take a while.").grid(row = 5, column= 0, columnspan=2)
+        gtaa, bh = portfolios.performCalulation(name = p2, start = dt.date(1900,1,1), end = dt.date.today())
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        qs.reports.html(returns=gtaa, benchmark=bh, title = p2 + " vs. Buy & Hold", output= p2 + "vsB&H.html")
+        webbrowser.open("file://" + dir_path + "/" + p2 + "vsB&H.html")
+    elif p1 != "None" and p2 == "None":
+        Label(text = "Please be very patient, this may take a while.").grid(row = 5, column= 0, columnspan=2)
+        gtaa, bh = portfolios.performCalulation(name = p1, start = dt.date(1900,1,1), end = dt.date.today())
         dir_path = os.path.dirname(os.path.realpath(__file__))
         qs.reports.html(returns=gtaa, benchmark=bh, title = p1 + " vs. Buy & Hold", output= p1 + "vsB&H.html")
-        webview.create_window("My Analysis", dir_path + p1 + "vsB&H.html")
+        webbrowser.open("file://" + dir_path + "/" + p1 + "vsB&H.html")
+    else:
+        Label(text = "Please be very patient, this may take a while.").grid(row = 5, column= 0, columnspan=2)
+        gtaa1, bh1 = portfolios.performCalulation(name = p1, start = dt.date(1900,1,1), end = dt.date.today())
+        gtaa2, bh2 = portfolios.performCalulation(name = p2, start = dt.date(1900,1,1), end = dt.date.today())
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        qs.reports.html(returns=gtaa1, benchmark=gtaa2, title = p1 + " vs. " + p2, output= p1 + "vs" + p2 + ".html")
+        webbrowser.open("file://" + dir_path + "/" + p1 + "vs" + p2 + ".html")
         
     
 
@@ -154,31 +167,15 @@ def calculation_window():
     Label(text = "Select one strategy to create an analysis using the Buy and Hold strategy as a Benchmark.").grid(row = 1, column = 0, columnspan=2)
     Label(text = "Or select two portfolios to compare them.").grid(row = 2, column = 0, columnspan=2)
     optionList = ["None"] + list(portfolios.portfolios.keys())
-    variable = StringVar(app, value = None)
-    variable.set(optionList[0])
-    name1 = OptionMenu(app, variable, *optionList)
+    variable1 = StringVar(app, value = None)
+    variable1.set(optionList[0])
+    variable2 = StringVar(app, value = None)
+    variable2.set(optionList[0])
+    name1 = OptionMenu(app, variable1, *optionList)
     name1.grid(row = 3, column = 0)
-    name2 = OptionMenu(app, variable, *optionList)
+    name2 = OptionMenu(app, variable2, *optionList)
     name2.grid(row = 3, column = 1)
-    Button(app, text = "Generate Analysis", command = lambda: analyse(name1, name2)).grid(row = 4, column = 0, columnspan=2)
-    
-    
+    Button(app, text = "Generate Analysis", command = lambda: analyse(variable1, variable2)).grid(row = 4, column = 0, columnspan=2)
     app.mainloop()
 
 main()
-
-
-"""OptionList = ["Aries", "Taurus", "Gemini", "Cancer"]
-
-app = Tk()
-
-app.geometry("100x200")
-
-variable = StringVar(app)
-variable.set(OptionList[0])
-
-opt = OptionMenu(app, variable, *OptionList)
-opt.config(width=90, font=("Helvetica", 12))
-opt.pack()
-
-app.mainloop()"""
