@@ -150,7 +150,7 @@ class Entry:
 
 
 
-class MyPortfolio:
+class Portfolio:
     def __init__(self, entries: list, average: int, name: str):
         self.__entries = {i: Entry(entries[i][0], i) for i in range(len(entries))}  #tickers must be unique
         self.__weights = {i: entries[i][1] for i in range(len(entries))}
@@ -247,17 +247,10 @@ class Portfoliolist:
     def set_num_portfolios(self, new: int) -> None:
         self.__num_portfolios = new
     
-    def addPortfolio(self, portfolio: MyPortfolio) -> None:
+    def addPortfolio(self, portfolio: Portfolio) -> None:
         portfolio.set_id(self.num_portfolios + 1)
         self.__portfolios[self.num_portfolios + 1] = portfolio
         self.set_num_portfolios(self.num_portfolios + 1)
-    
-    def deletePortfolio(self, id: int) -> None:
-        for i in range(id+1, self.num_portfolios):
-            self.__portfolios[i].set_id(i-1)
-            self.__portfolios[i-1] = self.__portfolios[i]
-        del self.__portfolios[self.num_portfolios]
-        self.set_num_portfolios(self.num_portfolios - 1)
     
     def performCalulation(self, id: int, start: dt.date, end: dt.date) -> None:
         gtaa, bh = self.portfolios[id].relative_calculation(start, end)
