@@ -44,7 +44,6 @@ class Entry:
     def set_ticker(self, newticker: str) -> None:
         self.__ticker = newticker
         self.update_name()
-        #self.update_history()
     
     def update_name(self) -> None:
         self.__name = yf.Ticker(self.__ticker).info["longName"]
