@@ -117,20 +117,22 @@ def analyse(name1: Entry, name2: Entry) -> None:
         Label(text = "You have to select at least one strategy.").grid(row = 5, column= 0, columnspan=2)
     elif p1 == "None" and p2 != "None":
         Label(text = "Please be very patient, this may take a while.").grid(row = 5, column= 0, columnspan=2)
-        gtaa, bh = portfolios.performCalulation(name = p2, start = dt.date(1900,1,1), end = dt.date.today())
+        gtaa, bh, first_date = portfolios.performCalulation(name = p2, start = dt.date(1900,1,1), end = dt.date.today())
         dir_path = os.path.dirname(os.path.realpath(__file__))
         qs.reports.html(returns=gtaa, benchmark=bh, title = p2 + " vs. Buy & Hold", output= p2 + "vsB&H.html")
         webbrowser.open("file://" + dir_path + "/" + p2 + "vsB&H.html")
     elif p1 != "None" and p2 == "None":
         Label(text = "Please be very patient, this may take a while.").grid(row = 5, column= 0, columnspan=2)
-        gtaa, bh = portfolios.performCalulation(name = p1, start = dt.date(1900,1,1), end = dt.date.today())
+        gtaa, bh, first_date = portfolios.performCalulation(name = p1, start = dt.date(1900,1,1), end = dt.date.today())
         dir_path = os.path.dirname(os.path.realpath(__file__))
         qs.reports.html(returns=gtaa, benchmark=bh, title = p1 + " vs. Buy & Hold", output= p1 + "vsB&H.html")
         webbrowser.open("file://" + dir_path + "/" + p1 + "vsB&H.html")
     else:
         Label(text = "Please be very patient, this may take a while.").grid(row = 5, column= 0, columnspan=2)
-        gtaa1, bh1 = portfolios.performCalulation(name = p1, start = dt.date(1900,1,1), end = dt.date.today())
-        gtaa2, bh2 = portfolios.performCalulation(name = p2, start = dt.date(1900,1,1), end = dt.date.today())
+        gtaa1, bh1, first_date1 = portfolios.performCalulation(name = p1, start = dt.date(1900,1,1), end = dt.date.today())
+        gtaa2, bh2, first_date2 = portfolios.performCalulation(name = p2, start = dt.date(1900,1,1), end = dt.date.today())
+        first_date = max(first_date1, first_date2)
+        gtaa1, gtaa2 = gtaa1[first_date:], gtaa2[first_date:]
         dir_path = os.path.dirname(os.path.realpath(__file__))
         qs.reports.html(returns=gtaa1, benchmark=gtaa2, title = p1 + " vs. " + p2, output= p1 + "vs" + p2 + ".html")
         webbrowser.open("file://" + dir_path + "/" + p1 + "vs" + p2 + ".html")

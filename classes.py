@@ -65,16 +65,10 @@ class Entry:
         dates = [pd.Timestamp(date).to_pydatetime().replace(tzinfo = None).date() for date in dates]
         #change history series index:
         history.index = dates
-
-        factors = [quote for quote in history]
-        q0 = factors[0]
-        #norm to start at Factor 1
-        factors = [quote/q0 for quote in factors]
+        
         #now converting history to dataframe:
         history = history.to_frame()
         history["SMA"] = history["Close"].rolling(window = sma).mean()
-        print(history)
-        print(type(history.iloc[0].name))
         #index to start calculation at
         index = 0
         while history.iloc[index].name < start:
@@ -198,23 +192,25 @@ class Portfolio:
     def relative_calculation(self, start: dt.date, end: dt.date) -> list:
         gtaa_list, bh_list = [], []
         first_date = start
-        last_date = end
         for entry_id in self.entries:
             gtaa, bh = self.entries[entry_id].calculation(start = start, end = end, sma = self.average)
-            first_date = max(first_date, gtaa.index[0].to_pydatetime().date())
-            last_date = min(last_date, gtaa.index[-1].to_pydatetime().date())
+            first = 0
+            while gtaa[first] == 1:
+                first += 1
+            first -= 1
+            first_date = max(first_date, gtaa.index[first].to_pydatetime().date())
             gtaa_list.append(gtaa)
             bh_list.append(bh)
-        gtaa = gtaa_list[0][first_date:last_date]*self.weights[0]
-        bh = bh_list[0][first_date:last_date]*self.weights[0]
+        gtaa = gtaa_list[0][first_date:end]*self.weights[0]
+        bh = bh_list[0][first_date:end]*self.weights[0]
         for index in range(1, len(gtaa_list)):
             next_gtaa = gtaa_list[index]
             next_bh = bh_list[index]
-            next_gtaa = next_gtaa[first_date:last_date]
-            next_bh = next_bh[first_date:last_date]
+            next_gtaa = next_gtaa[first_date:end]
+            next_bh = next_bh[first_date:end]
             gtaa += next_gtaa*self.weights[index]
             bh += next_bh*self.weights[index]
-        return gtaa, bh
+        return gtaa, bh, first_date
 
 
 class Portfoliolist:
@@ -229,5 +225,5 @@ class Portfoliolist:
         self.__portfolios[name] = portfolio
     
     def performCalulation(self, name: str, start: dt.date, end: dt.date) -> None:
-        gtaa, bh = self.portfolios[name].relative_calculation(start, end)
-        return gtaa, bh
+        gtaa, bh, first_date = self.portfolios[name].relative_calculation(start, end)
+        return gtaa, bh, first_date
