@@ -195,7 +195,7 @@ class Portfolio:
         for entry_id in self.entries:
             gtaa, bh = self.entries[entry_id].calculation(start = start, end = end, sma = self.average)
             first = 0
-            while gtaa[first] == 1:
+            while gtaa[first] == 1 and first < len(gtaa):
                 first += 1
             first -= 1
             first_date = max(first_date, gtaa.index[first].to_pydatetime().date())
