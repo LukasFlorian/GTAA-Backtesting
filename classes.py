@@ -73,9 +73,9 @@ class Entry:
         index = 0
         while history.iloc[index].name < start:
             index += 1
+            if index >= len(history):
+                break
         history = history.iloc[index:]
-
-
         index = 0
         investment = 1
         bh_investment = 1
@@ -189,7 +189,7 @@ class Portfolio:
     def change_entry_ticker(self, id, newticker: str) -> None:
         self.__entries[id].set_ticker(newticker)
     
-    def relative_calculation(self, start: dt.date, end: dt.date) -> list:
+    def relative_calculation(self, start: dt.date, end: dt.date) -> tuple:
         gtaa_list, bh_list = [], []
         first_date = start
         for entry_id in self.entries:
